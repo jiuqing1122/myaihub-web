@@ -79,6 +79,29 @@ export const QA_RECORDS = [
   }
 ]
 
+// 分页演示用：给 USER demo 追加 8 条较早的记录，使列表超过一页
+;[
+  '试用期是多长时间？',
+  '加班可以调休吗？',
+  '住房公积金缴存比例是多少？',
+  '出差住宿标准是多少？',
+  '入职体检怎么安排？',
+  '内部转岗需要什么条件？',
+  '年假可以跨年使用吗？',
+  '考勤异常怎么申诉？'
+].forEach((question, i) => {
+  QA_RECORDS.push({
+    id: String(1010 + i),
+    userId: '2',
+    question,
+    answer: '按《员工手册》相关规定执行，如有疑问请联系人力资源部。',
+    status: 'SUCCESS',
+    latencyMs: 1800 + i * 90,
+    createTime: `2026-10-${String(28 - i).padStart(2, '0')} 10:00:00`,
+    sources: []
+  })
+})
+
 // 实时问答 sources 为 snake_case：doc_id / distance / similarity / metadata.source / metadata.page
 // 含一条 similarity 为 null 的 BM25 独有命中，用来验证「—」显示
 export const MOCK_ANSWERS = [

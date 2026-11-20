@@ -12,6 +12,6 @@ export function register(payload) {
 }
 
 export function me() {
-  if (USE_MOCK) return mockMe(localStorage.getItem('token'))
+  if (USE_MOCK) return mockMe()
   return http.get('/auth/me')
 }
