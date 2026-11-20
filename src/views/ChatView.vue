@@ -10,6 +10,7 @@ const messages = ref([])
 const input = ref('')
 const streaming = ref(false)
 const scroller = ref(null)
+const statusText = ref('')
 let controller = null
 let seq = 0
 
@@ -43,6 +44,7 @@ async function send(text) {
   messages.value.push(assistant)
 
   streaming.value = true
+  statusText.value = '正在检索并生成回答'
   const ctrl = new AbortController()
   controller = ctrl
   stickToBottom()
@@ -62,6 +64,9 @@ async function send(text) {
       },
       onDone: () => {
         assistant.state = 'done'
+        statusText.value = assistant.sources?.length
+          ? `回答完成，共 ${assistant.sources.length} 条引用`
+          : '回答完成，未找到相关资料'
         stickToBottom()
       }
     })
@@ -69,9 +74,11 @@ async function send(text) {
   } catch (err) {
     if (ctrl.signal.aborted) {
       assistant.state = 'stopped'
+      statusText.value = '已停止生成'
     } else {
       assistant.state = 'error'
       assistant.error = err.message || '生成回答失败'
+      statusText.value = `回答失败：${assistant.error}`
     }
   } finally {
     streaming.value = false
@@ -115,11 +122,13 @@ onBeforeUnmount(() => controller?.abort())
           </div>
         </div>
 
-        <div v-else class="messages">
+        <div v-else class="messages" :aria-busy="streaming">
           <MessageBubble v-for="m in messages" :key="m.id" :message="m" />
         </div>
       </div>
     </div>
+
+    <p class="sr-only" role="status" aria-atomic="true">{{ statusText }}</p>
 
     <footer class="composer">
       <div class="composer-inner">

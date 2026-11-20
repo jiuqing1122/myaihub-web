@@ -52,4 +52,9 @@ router.beforeEach(async (to) => {
   }
 })
 
+// 浏览器标签页标题跟随路由，方便多标签时辨认
+router.afterEach((to) => {
+  document.title = to.meta.title ? `${to.meta.title} · MyAIHub` : 'MyAIHub 知识库问答'
+})
+
 export default router

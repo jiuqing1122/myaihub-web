@@ -148,7 +148,7 @@ function logout() {
 
 .brand-sub {
   font-size: 11px;
-  color: rgba(247, 246, 241, 0.45);
+  color: rgba(247, 246, 241, 0.6);
   letter-spacing: 0.08em;
 }
 
@@ -246,7 +246,7 @@ function logout() {
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.06em;
-  color: rgba(247, 246, 241, 0.42);
+  color: rgba(247, 246, 241, 0.58);
 }
 
 /* ---------- 折叠态 ---------- */
@@ -391,10 +391,19 @@ function logout() {
 
   .nav-item,
   .collapsed .nav-item {
-    padding: 6px 10px;
+    padding: 10px 12px;
     border-left: 0;
     border-bottom: 2px solid transparent;
     border-radius: 4px 4px 0 0;
+  }
+
+  .nav-icon {
+    font-size: 18px;
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
   }
 
   .nav-item.router-link-active {

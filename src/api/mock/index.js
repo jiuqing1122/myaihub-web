@@ -1,4 +1,4 @@
-import { USERS, MOCK_ANSWERS, QA_RECORDS } from './fixtures'
+import { USERS, MOCK_ANSWERS, QA_RECORDS, DOCUMENTS } from './fixtures'
 
 // 开发期 mock 开关；F5 后保留目录但不启用（.env.production 中为 false）
 export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
@@ -203,4 +203,66 @@ export function mockQaDelete(id) {
 
   localStorage.setItem(DELETED_STORE, JSON.stringify([...deletedIds(), record.id]))
   return mockResolve({ deleted: true })
+}
+
+/* ============ 文档 ============ */
+
+const UPLOADED_DOCS = 'mock_docs_uploaded'
+const DELETED_DOCS = 'mock_docs_deleted'
+
+const readUploadedDocs = () => JSON.parse(localStorage.getItem(UPLOADED_DOCS) || '[]')
+const deletedDocs = () => new Set(JSON.parse(localStorage.getItem(DELETED_DOCS) || '[]'))
+
+function visibleDocs() {
+  const deleted = deletedDocs()
+  return [...readUploadedDocs(), ...DOCUMENTS].filter((d) => !deleted.has(d.docId))
+}
+
+export function mockDocList({ page = 1, pageSize = 20, keyword = '' } = {}) {
+  const user = currentUser()
+  if (!user) return mockReject(40100, '登录已过期，请重新登录')
+
+  const kw = String(keyword).trim()
+  const list = visibleDocs().filter((d) => !kw || d.filename.includes(kw))
+  const p = Number(page)
+  const size = Number(pageSize)
+  const start = (p - 1) * size
+  return mockResolve(
+    { items: list.slice(start, start + size), total: list.length, page: p, pageSize: size },
+    250
+  )
+}
+
+export function mockDocUpload(file = {}) {
+  const user = currentUser()
+  if (!user) return mockReject(40100, '登录已过期，请重新登录')
+  if (user.role !== 'ADMIN') return mockReject(40300, '仅管理员可上传文档')
+
+  const name = file.name || '未命名文档'
+  const size = file.size || 0
+  const doc = {
+    docId: 'u' + Date.now(),
+    filename: name,
+    originalFilename: name,
+    size,
+    contentType: file.type || 'application/octet-stream',
+    uploadTime: new Date().toISOString().slice(0, 19),
+    chunkCount: Math.max(1, Math.ceil(size / 40000)),
+    pageCount: Math.max(1, Math.ceil(size / 60000)),
+    ext: name.includes('.') ? name.split('.').pop().toLowerCase() : '',
+    status: 'ready'
+  }
+  localStorage.setItem(UPLOADED_DOCS, JSON.stringify([doc, ...readUploadedDocs()]))
+  return mockResolve(doc, 700)
+}
+
+export function mockDocDelete(docId) {
+  const user = currentUser()
+  if (!user) return mockReject(40100, '登录已过期，请重新登录')
+  if (user.role !== 'ADMIN') return mockReject(40300, '仅管理员可删除文档')
+
+  const id = String(docId)
+  const existed = visibleDocs().some((d) => d.docId === id)
+  localStorage.setItem(DELETED_DOCS, JSON.stringify([...deletedDocs(), id]))
+  return mockResolve({ docId: id, existed })
 }

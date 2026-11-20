@@ -10,7 +10,7 @@
   --line-strong: #c9c6ba;
   --text: #1b2320;
   --text-2: #4a544f;
-  --muted: #6b7570;
+  --muted: #5f6a65;
   --accent: #2e6b5e;
   --accent-ink: #235247;
   --accent-tint: #e3ede9;
@@ -76,6 +76,19 @@ a:hover {
   outline-offset: 2px;
 }
 
+/* 仅屏幕阅读器可见（状态播报用） */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -125,12 +138,75 @@ a:hover {
   background: rgba(255, 255, 255, 0.5);
 }
 
+.page-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* 数据表格（历史记录 / 文档管理共用） */
+.data-table {
+  --el-table-border-color: var(--line);
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: transparent;
+  --el-table-row-hover-bg-color: #f2f0e8;
+  font-size: 13px;
+}
+
+.data-table th.el-table__cell {
+  padding: 8px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  background: transparent;
+}
+
+.data-table td.el-table__cell {
+  padding: 11px 0;
+  color: var(--text-2);
+}
+
+.data-table .el-table__row {
+  cursor: pointer;
+}
+
+.data-table .el-table__inner-wrapper::before {
+  display: none;
+}
+
+/* 链接按钮去掉默认内边距，窄列里能并排 */
+.data-table .el-button.is-link {
+  height: auto;
+  padding: 0;
+}
+
+.data-table .el-button + .el-button {
+  margin-left: 10px;
+}
+
+.pager {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
 .placeholder-card strong {
   display: block;
   margin-bottom: 6px;
   font-family: var(--serif);
   font-size: 17px;
   color: var(--text-2);
+}
+
+@media (max-width: 700px) {
+  /* 表格里的文字按钮在触屏上要够得着 */
+  .data-table .el-button.is-link {
+    min-height: 32px;
+    padding: 6px 0;
+  }
 }
 
 @media (max-width: 640px) {
@@ -141,6 +217,10 @@ a:hover {
   .page-head {
     flex-direction: column;
     gap: 4px;
+  }
+
+  .pager {
+    justify-content: center;
   }
 }
 
@@ -241,7 +321,7 @@ a:hover {
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.04em;
-  color: rgba(247, 246, 241, 0.42);
+  color: rgba(247, 246, 241, 0.55);
 }
 
 .auth-body {

@@ -111,16 +111,24 @@ onMounted(fetchList)
         v-model="filters.keyword"
         placeholder="搜索问题或回答"
         clearable
+        aria-label="按关键词筛选记录"
         class="f-keyword"
         @keyup.enter="search"
       />
-      <el-select v-model="filters.status" placeholder="全部状态" clearable class="f-status">
+      <el-select
+        v-model="filters.status"
+        placeholder="全部状态"
+        clearable
+        aria-label="按状态筛选记录"
+        class="f-status"
+      >
         <el-option v-for="(item, key) in STATUS" :key="key" :label="item.text" :value="key" />
       </el-select>
       <el-input
         v-model="filters.docId"
         placeholder="文档 ID"
         clearable
+        aria-label="按文档 ID 筛选记录"
         class="f-doc"
         @keyup.enter="search"
       />
@@ -131,7 +139,7 @@ onMounted(fetchList)
     <el-table
       v-loading="loading"
       :data="records"
-      class="records-table"
+      class="data-table records-table"
       @row-click="openDetail"
     >
       <el-table-column label="问题" :min-width="narrow ? 160 : 300" show-overflow-tooltip>
@@ -235,48 +243,7 @@ onMounted(fetchList)
   width: 160px;
 }
 
-/* ---------- 表格 ---------- */
-.records-table {
-  --el-table-border-color: var(--line);
-  --el-table-bg-color: transparent;
-  --el-table-tr-bg-color: transparent;
-  --el-table-header-bg-color: transparent;
-  --el-table-row-hover-bg-color: #f2f0e8;
-  font-size: 13px;
-}
-
-.records-table :deep(th.el-table__cell) {
-  padding: 8px 0;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  background: transparent;
-}
-
-.records-table :deep(td.el-table__cell) {
-  padding: 11px 0;
-  color: var(--text-2);
-}
-
-.records-table :deep(.el-table__row) {
-  cursor: pointer;
-}
-
-.records-table :deep(.el-table__inner-wrapper::before) {
-  display: none;
-}
-
-/* 链接按钮去掉默认内边距，窄列里「查看 / 删除」能并排 */
-.records-table :deep(.el-button.is-link) {
-  height: auto;
-  padding: 0;
-}
-
-.records-table :deep(.el-button + .el-button) {
-  margin-left: 10px;
-}
+/* 表格通用样式在 main.css 的 .data-table */
 
 /* 状态胶囊 */
 .state {
@@ -326,12 +293,6 @@ onMounted(fetchList)
   padding: 12px 0;
   color: var(--muted);
   font-size: 13px;
-}
-
-.pager {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
 }
 
 /* ---------- 详情抽屉 ---------- */
