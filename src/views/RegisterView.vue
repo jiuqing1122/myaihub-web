@@ -1,8 +1,54 @@
 <script setup>
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { useAuthStore } from '../stores/auth'
 
-// F0 骨架：仅占位表单，注册接口与校验在 F1 接入
-const form = ref({ username: '', password: '', nickname: '' })
+const auth = useAuthStore()
+const router = useRouter()
+
+const formRef = ref()
+const loading = ref(false)
+const form = reactive({ username: '', password: '', nickname: '' })
+
+const validateUsername = (rule, value, cb) => {
+  const name = (value || '').trim()
+  if (name.length < 4 || name.length > 32) return cb(new Error('用户名需 4–32 位'))
+  cb()
+}
+
+const validatePassword = (rule, value, cb) => {
+  if (!value) return cb(new Error('请输入密码'))
+  if (value.length < 8 || value.length > 64) return cb(new Error('密码需 8–64 位'))
+  if (!/[A-Za-z]/.test(value) || !/\d/.test(value)) return cb(new Error('密码需同时包含字母和数字'))
+  cb()
+}
+
+const rules = {
+  username: [{ validator: validateUsername, trigger: 'blur' }],
+  password: [{ validator: validatePassword, trigger: 'blur' }]
+}
+
+async function submit() {
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  loading.value = true
+  try {
+    // 注册成功后端直接返回 token，视为已登录
+    await auth.register({
+      username: form.username.trim(),
+      password: form.password,
+      nickname: form.nickname.trim()
+    })
+    ElMessage.success('注册成功')
+    router.replace('/chat')
+  } catch (err) {
+    ElMessage.error(err.message)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -27,11 +73,11 @@ const form = ref({ username: '', password: '', nickname: '' })
         <h2>注册</h2>
         <p class="auth-sub">创建账号后自动登录。</p>
 
-        <el-form label-position="top" @submit.prevent>
-          <el-form-item label="用户名">
+        <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent="submit">
+          <el-form-item label="用户名" prop="username">
             <el-input v-model="form.username" placeholder="4–32 位，注册后不可修改" autocomplete="username" />
           </el-form-item>
-          <el-form-item label="密码">
+          <el-form-item label="密码" prop="password">
             <el-input
               v-model="form.password"
               type="password"
@@ -43,11 +89,12 @@ const form = ref({ username: '', password: '', nickname: '' })
           <el-form-item label="昵称（可选）">
             <el-input v-model="form.nickname" placeholder="显示在个人信息的名称" />
           </el-form-item>
-          <el-button type="primary" class="auth-submit" disabled>注册</el-button>
+          <el-button type="primary" native-type="submit" class="auth-submit" :loading="loading">
+            注册
+          </el-button>
         </el-form>
 
         <p class="auth-switch">已有账号？<router-link to="/login">登录</router-link></p>
-        <p class="dev-note">F0 工程骨架 · 注册逻辑在 F1 接入</p>
       </div>
     </section>
   </div>

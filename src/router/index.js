@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import AppLayout from '../components/AppLayout.vue'
 
 // 页面按需加载；布局内页面共用 AppLayout（侧边导航 + 状态条）
@@ -26,7 +27,29 @@ const routes = [
   { path: '/:pathMatch(.*)*', redirect: '/chat' }
 ]
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+// 守卫：无 token 去登录页；有 token 不进登录/注册页；刷新后回填用户信息
+router.beforeEach(async (to) => {
+  const auth = useAuthStore()
+
+  if (!auth.token) {
+    return to.meta.public ? true : { path: '/login', query: { redirect: to.fullPath } }
+  }
+
+  if (to.meta.public) return '/chat'
+
+  if (!auth.user) {
+    try {
+      await auth.fetchMe()
+    } catch {
+      auth.logout()
+      return { path: '/login', query: { redirect: to.fullPath } }
+    }
+  }
+})
+
+export default router

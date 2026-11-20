@@ -1,8 +1,38 @@
 <script setup>
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { useAuthStore } from '../stores/auth'
+import { USE_MOCK } from '../api/mock'
 
-// F0 骨架：仅占位表单，登录接口与校验在 F1 接入
-const form = ref({ username: '', password: '' })
+const auth = useAuthStore()
+const route = useRoute()
+const router = useRouter()
+
+const formRef = ref()
+const loading = ref(false)
+const form = reactive({ username: '', password: '' })
+
+const rules = {
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+}
+
+async function submit() {
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  loading.value = true
+  try {
+    await auth.login({ username: form.username.trim(), password: form.password })
+    ElMessage.success('登录成功')
+    router.replace(route.query.redirect || '/chat')
+  } catch (err) {
+    ElMessage.error(err.message)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -27,11 +57,11 @@ const form = ref({ username: '', password: '' })
         <h2>登录</h2>
         <p class="auth-sub">使用你的账号继续。</p>
 
-        <el-form label-position="top" @submit.prevent>
-          <el-form-item label="用户名">
+        <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent="submit">
+          <el-form-item label="用户名" prop="username">
             <el-input v-model="form.username" placeholder="4–32 位用户名" autocomplete="username" />
           </el-form-item>
-          <el-form-item label="密码">
+          <el-form-item label="密码" prop="password">
             <el-input
               v-model="form.password"
               type="password"
@@ -40,11 +70,13 @@ const form = ref({ username: '', password: '' })
               autocomplete="current-password"
             />
           </el-form-item>
-          <el-button type="primary" class="auth-submit" disabled>登录</el-button>
+          <el-button type="primary" native-type="submit" class="auth-submit" :loading="loading">
+            登录
+          </el-button>
         </el-form>
 
         <p class="auth-switch">还没有账号？<router-link to="/register">注册</router-link></p>
-        <p class="dev-note">F0 工程骨架 · 登录逻辑在 F1 接入</p>
+        <p v-if="USE_MOCK" class="dev-note">演示账号 demo / demo1234 · 管理员 admin / admin123</p>
       </div>
     </section>
   </div>

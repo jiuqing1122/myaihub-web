@@ -51,6 +51,7 @@ function logout() {
           :to="item.path"
           class="nav-item"
           :title="collapsed ? item.label : undefined"
+          :aria-label="item.label"
         >
           <el-icon class="nav-icon"><component :is="item.icon" /></el-icon>
           <span class="nav-label">{{ item.label }}</span>
