@@ -90,7 +90,9 @@ function logout() {
 <style scoped>
 .shell {
   display: flex;
-  min-height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 /* ---------- 侧边栏 ---------- */
@@ -291,6 +293,7 @@ function logout() {
   flex-direction: column;
   flex: 1;
   min-width: 0;
+  min-height: 0;
 }
 
 .statusbar {
@@ -337,8 +340,12 @@ function logout() {
 }
 
 .content {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* ---------- 窄屏：侧栏变顶栏，导航横向排列 ---------- */

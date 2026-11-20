@@ -1,4 +1,4 @@
-import { USERS } from './fixtures'
+import { USERS, MOCK_ANSWERS } from './fixtures'
 
 // 开发期 mock 开关；F5 后保留目录但不启用（.env.production 中为 false）
 export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
@@ -58,4 +58,47 @@ export function mockMe(token) {
   const user = readUsers().find((u) => u.id === id)
   if (!user) return mockReject(40100, '登录已过期，请重新登录')
   return mockResolve(publicUser(user))
+}
+
+/* ============ 流式问答 ============ */
+
+const abortError = () => new DOMException('Aborted', 'AbortError')
+
+// 可被 AbortSignal 打断的延迟，保证「停止」立即生效
+function abortableSleep(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(abortError())
+    const timer = setTimeout(resolve, ms)
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer)
+        reject(abortError())
+      },
+      { once: true }
+    )
+  })
+}
+
+// 按 sources → message×N → done 的顺序逐字产出，问句中含「报错」模拟 error 事件
+export async function mockChatStream({ question, signal, onSources, onMessage, onDone }) {
+  await abortableSleep(500, signal)
+
+  if (question.includes('报错')) {
+    const err = new Error('生成回答失败，请稍后重试')
+    err.code = 50001
+    throw err
+  }
+
+  const hit = MOCK_ANSWERS.find((item) => item.keywords.some((k) => question.includes(k)))
+  onSources(structuredClone(hit?.sources || []))
+
+  const answer =
+    hit?.answer || '知识库里没有找到与这个问题相关的内容。可以换个问法，或联系管理员补充相关文档。'
+
+  for (let i = 0; i < answer.length; i += 4) {
+    await abortableSleep(60 + Math.random() * 60, signal)
+    onMessage(answer.slice(i, i + 4))
+  }
+  onDone()
 }

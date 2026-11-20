@@ -28,7 +28,7 @@ function rejectWith(res) {
     body?.message ||
     (res ? `请求失败（${res.status}）` : '网络异常，请确认后端服务已启动')
 
-  if (code === 40100 || res?.status === 401) handleUnauthorized()
+  if (code === 40100 || res?.status === 401) onUnauthorized()
 
   const error = new Error(message)
   error.code = code
@@ -36,7 +36,8 @@ function rejectWith(res) {
 }
 
 // 仅在已登录状态收到 401 时清 token 并回登录页；登录页输错密码不会触发
-function handleUnauthorized() {
+// 导出给 SSE 客户端复用（fetch-event-source 不走 axios 拦截器）
+export function onUnauthorized() {
   if (!localStorage.getItem('token')) return
   localStorage.removeItem('token')
   window.location.assign('/login')

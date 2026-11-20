@@ -79,6 +79,68 @@ export const QA_RECORDS = [
   }
 ]
 
+// 实时问答 sources 为 snake_case：doc_id / distance / similarity / metadata.source / metadata.page
+// 含一条 similarity 为 null 的 BM25 独有命中，用来验证「—」显示
+export const MOCK_ANSWERS = [
+  {
+    keywords: ['年假', '休假', '假期'],
+    answer:
+      '根据《员工考勤管理制度》第三章，正式员工累计工作满一年不满十年的，年休假 5 天；满十年不满二十年的，年休假 10 天；满二十年及以上的，年休假 15 天。年假需至少提前 3 个工作日在 OA 系统提交申请，经直属上级审批后生效。',
+    sources: [
+      {
+        doc_id: 'd1',
+        chunk:
+          '第三章 休假管理：正式员工累计工作满一年不满十年的，年休假 5 天；满十年不满二十年的，10 天；满二十年及以上的，15 天。',
+        distance: 0.18,
+        similarity: 0.82,
+        metadata: { source: '员工考勤管理制度.pdf', page: 3, chunk_index: 5 }
+      },
+      {
+        doc_id: 'd1',
+        chunk: '年休假申请应至少提前 3 个工作日在 OA 系统提交，经直属上级审批后生效。',
+        distance: 0.24,
+        similarity: 0.71,
+        metadata: { source: '员工考勤管理制度.pdf', page: 4, chunk_index: 6 }
+      },
+      {
+        doc_id: 'd3',
+        chunk: '《信息安全管理办法》中关于账号与权限的章节也提到了休假期间的账号交接要求。',
+        distance: null,
+        similarity: null,
+        metadata: { source: '信息安全管理办法.pdf', page: 1, chunk_index: 2 }
+      }
+    ]
+  },
+  {
+    keywords: ['报销', '发票', '差旅'],
+    answer:
+      '差旅报销需在出差结束后 15 日内提交：① 在 OA 填写报销单并上传合规发票；② 直属上级审批；③ 财务复核；④ 打款至工资卡。单笔超过 5000 元需部门负责人二次审批。',
+    sources: [
+      {
+        doc_id: 'd2',
+        chunk: '出差结束后 15 日内，员工应在 OA 系统提交差旅报销申请，并上传合规发票原件扫描件。',
+        distance: 0.21,
+        similarity: null,
+        metadata: { source: '财务报销手册.docx', page: 1, chunk_index: 0 }
+      }
+    ]
+  },
+  {
+    keywords: ['安全', '培训', '密码'],
+    answer:
+      '信息安全培训由信息中心每季度组织一次，OA 通知报名。新员工入职 30 日内必须完成首次培训，培训后在线测评 80 分及以上为通过。',
+    sources: [
+      {
+        doc_id: 'd3',
+        chunk: '信息安全培训由信息中心每季度组织一次，新员工须在入职 30 日内完成首次培训并通过测评。',
+        distance: 0.16,
+        similarity: 0.88,
+        metadata: { source: '信息安全管理办法.pdf', page: 2, chunk_index: 3 }
+      }
+    ]
+  }
+]
+
 // 文档接口已由 Java 统一为 camelCase
 export const DOCUMENTS = [
   {
