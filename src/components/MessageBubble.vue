@@ -1,9 +1,16 @@
 <script setup>
+import { computed, ref } from 'vue'
+import { ArrowRight } from '@element-plus/icons-vue'
 import SourceCard from './SourceCard.vue'
+import { renderMarkdown } from '../utils/markdown'
 
-defineProps({
+const props = defineProps({
   message: { type: Object, required: true }
 })
+
+const rendered = computed(() => renderMarkdown(props.message.content))
+// 引用来源默认折叠，按需展开
+const showSources = ref(false)
 </script>
 
 <template>
@@ -11,20 +18,38 @@ defineProps({
     <div v-if="message.role === 'user'" class="user-bubble">{{ message.content }}</div>
 
     <div v-else class="answer">
-      <p class="answer-text">
-        {{ message.content }}<span v-if="message.state === 'streaming'" class="caret" aria-hidden="true"></span>
-      </p>
+      <div
+        class="answer-text"
+        :class="{ streaming: message.state === 'streaming' }"
+        v-html="rendered"
+      ></div>
 
       <p v-if="message.state === 'streaming' && !message.content" class="hint">正在检索知识库…</p>
 
-      <section v-if="message.sources?.length" class="sources">
-        <p class="sources-label">引用来源 · {{ message.sources.length }}</p>
-        <SourceCard
-          v-for="(source, i) in message.sources"
-          :key="i"
-          :source="source"
-          :index="i + 1"
-        />
+      <!-- 回答结束后才出现来源；默认折叠，用户自行展开 -->
+      <section
+        v-if="message.sources?.length && message.state !== 'streaming'"
+        class="sources-block"
+      >
+        <button
+          type="button"
+          class="sources-toggle"
+          :aria-expanded="showSources"
+          :aria-controls="`sources-${message.id}`"
+          @click="showSources = !showSources"
+        >
+          <el-icon class="chevron" :class="{ open: showSources }"><ArrowRight /></el-icon>
+          <span>引用来源 · {{ message.sources.length }}</span>
+        </button>
+
+        <div v-if="showSources" :id="`sources-${message.id}`" class="sources">
+          <SourceCard
+            v-for="(source, i) in message.sources"
+            :key="i"
+            :source="source"
+            :index="i + 1"
+          />
+        </div>
       </section>
       <p v-else-if="message.sources && message.state !== 'streaming'" class="hint">未找到相关资料</p>
 
@@ -63,13 +88,44 @@ defineProps({
   font-size: 14.5px;
   line-height: 1.85;
   color: var(--text);
-  white-space: pre-wrap;
   word-break: break-word;
   min-height: 1.4em;
 }
 
-/* 流式光标：细方块，呼吸效果，减少动效时静止 */
-.caret {
+.answer-text :deep(p) {
+  margin: 0 0 10px;
+}
+
+.answer-text :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.answer-text :deep(ul),
+.answer-text :deep(ol) {
+  margin: 0 0 10px;
+  padding-left: 1.4em;
+}
+
+.answer-text :deep(li) {
+  margin: 2px 0;
+}
+
+.answer-text :deep(strong) {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.answer-text :deep(code) {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--accent-tint);
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+/* 流式光标：挂在最后一个块元素末尾，细方块呼吸 */
+.answer-text.streaming > :deep(:last-child)::after {
+  content: "";
   display: inline-block;
   width: 2px;
   height: 1em;
@@ -85,19 +141,51 @@ defineProps({
   }
 }
 
+.sources-block {
+  margin-top: 14px;
+}
+
+.sources-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 8px 4px 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.sources-toggle:hover {
+  color: var(--accent-ink);
+}
+
+.chevron {
+  font-size: 11px;
+  transition: transform 0.18s ease;
+}
+
+.chevron.open {
+  transform: rotate(90deg);
+}
+
 .sources {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 6px;
+  animation: sources-in 0.2s ease;
 }
 
-.sources-label {
-  margin: 0 0 2px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--muted);
+@keyframes sources-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 
 .hint {

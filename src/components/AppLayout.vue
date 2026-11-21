@@ -61,7 +61,7 @@ function logout() {
       <div class="user">
         <span class="avatar" aria-hidden="true">{{ initial }}</span>
         <div class="user-text">
-          <span class="user-name">{{ auth.user?.nickname || '未登录' }}</span>
+          <span class="user-name">{{ auth.user?.nickname || auth.user?.username || '未登录' }}</span>
           <span class="user-role">{{ roleText }}</span>
         </div>
         <button class="icon-btn logout-btn" title="退出登录" aria-label="退出登录" @click="logout">

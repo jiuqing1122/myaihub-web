@@ -60,12 +60,9 @@ async function submit() {
       </div>
 
       <div class="auth-copy">
-        <p class="auth-eyebrow">一个新账号，一份可查证的回答</p>
         <h1 class="auth-headline">先注册，<br />再<em>提问</em>。</h1>
         <p class="auth-lede">账号用于保存你的问答记录，方便随时回看答案与引用来源。</p>
       </div>
-
-      <p class="auth-foot">基于混合检索与重排序的领域知识库问答系统 · 二期</p>
     </section>
 
     <section class="auth-body">

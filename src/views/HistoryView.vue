@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { deleteRecord, getRecord, listRecords } from '../api/qa'
 import SourceCard from '../components/SourceCard.vue'
 import { useIsNarrow } from '../composables/useIsNarrow'
+import { renderMarkdown } from '../utils/markdown'
 
 const narrow = useIsNarrow()
 
@@ -206,7 +207,12 @@ onMounted(fetchList)
         </div>
 
         <h2 class="detail-question">{{ drawer.record.question }}</h2>
-        <p class="detail-answer">{{ drawer.record.answer || '（无回答）' }}</p>
+        <div
+          v-if="drawer.record.answer"
+          class="detail-answer"
+          v-html="renderMarkdown(drawer.record.answer)"
+        ></div>
+        <p v-else class="detail-answer">（无回答）</p>
 
         <section v-if="drawer.record.sources?.length" class="detail-sources">
           <p class="sources-label">引用来源 · {{ drawer.record.sources.length }}</p>
@@ -323,8 +329,33 @@ onMounted(fetchList)
   font-size: 14px;
   line-height: 1.9;
   color: var(--text);
-  white-space: pre-wrap;
   word-break: break-word;
+}
+
+.detail-answer :deep(p) {
+  margin: 0 0 10px;
+}
+
+.detail-answer :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.detail-answer :deep(ul),
+.detail-answer :deep(ol) {
+  margin: 0 0 10px;
+  padding-left: 1.4em;
+}
+
+.detail-answer :deep(strong) {
+  font-weight: 600;
+}
+
+.detail-answer :deep(code) {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--accent-tint);
+  font-family: var(--mono);
+  font-size: 0.9em;
 }
 
 .detail-sources {

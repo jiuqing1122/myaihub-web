@@ -64,6 +64,8 @@ async function send(text) {
       },
       onDone: () => {
         assistant.state = 'done'
+        // done 事件到达即解锁输入，不等连接关闭（Java 侧可能稍后才断开）
+        streaming.value = false
         statusText.value = assistant.sources?.length
           ? `回答完成，共 ${assistant.sources.length} 条引用`
           : '回答完成，未找到相关资料'
@@ -106,7 +108,6 @@ onBeforeUnmount(() => controller?.abort())
     <div ref="scroller" class="chat-scroll">
       <div class="chat-inner">
         <div v-if="!messages.length" class="empty">
-          <p class="eyebrow">混合检索 · 重排序 · 引用溯源</p>
           <h1>把问题交给知识库。</h1>
           <p class="lede">答案会附上出处，可以逐条核对。</p>
           <div class="suggestions">
@@ -181,14 +182,6 @@ onBeforeUnmount(() => controller?.abort())
   max-width: 560px;
   margin: 0 auto;
   padding-top: clamp(24px, 9vh, 88px);
-}
-
-.eyebrow {
-  margin: 0 0 14px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: var(--accent);
 }
 
 .empty h1 {

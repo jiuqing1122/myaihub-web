@@ -44,12 +44,9 @@ async function submit() {
       </div>
 
       <div class="auth-copy">
-        <p class="auth-eyebrow">混合检索 · 重排序 · 引用溯源</p>
         <h1 class="auth-headline">把问题交给<br /><em>知识库</em>。</h1>
         <p class="auth-lede">内部制度、流程与手册，一次提问同时给出答案和出处。</p>
       </div>
-
-      <p class="auth-foot">基于混合检索与重排序的领域知识库问答系统 · 二期</p>
     </section>
 
     <section class="auth-body">
